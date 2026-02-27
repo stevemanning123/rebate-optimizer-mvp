@@ -1,0 +1,101 @@
+import type { BudgetLevel, Category, Crop } from "@/lib/types";
+
+/**
+ * Tunable assumptions: typical spend $/acre by crop & category.
+ * Replace with your own Western Canada profiles, by province if desired.
+ */
+export const spendPerAcre: Record<Crop, Partial<Record<Category, Record<BudgetLevel, number>>>> = {
+  canola: {
+    preSeedHerb: { low: 18, med: 26, high: 36 },
+    inCropHerb: { low: 22, med: 30, high: 42 },
+    fungicide: { low: 10, med: 18, high: 28 },
+    insecticide: { low: 6, med: 10, high: 16 },
+    seedTreatment: { low: 8, med: 12, high: 18 },
+    biologicalsPGR: { low: 4, med: 7, high: 12 },
+    seedTrait: { low: 0, med: 0, high: 0 },
+  },
+  wheat: {
+    preSeedHerb: { low: 14, med: 20, high: 30 },
+    inCropHerb: { low: 12, med: 18, high: 26 },
+    fungicide: { low: 8, med: 14, high: 22 },
+    insecticide: { low: 2, med: 4, high: 8 },
+    seedTreatment: { low: 4, med: 7, high: 12 },
+    biologicalsPGR: { low: 2, med: 4, high: 8 },
+    seedTrait: { low: 0, med: 0, high: 0 },
+  },
+  barley: {
+    preSeedHerb: { low: 14, med: 20, high: 28 },
+    inCropHerb: { low: 10, med: 16, high: 24 },
+    fungicide: { low: 8, med: 14, high: 20 },
+    insecticide: { low: 2, med: 4, high: 8 },
+    seedTreatment: { low: 4, med: 6, high: 10 },
+    biologicalsPGR: { low: 2, med: 4, high: 8 },
+  },
+  oats: {
+    preSeedHerb: { low: 12, med: 18, high: 26 },
+    inCropHerb: { low: 10, med: 14, high: 22 },
+    fungicide: { low: 6, med: 10, high: 16 },
+    insecticide: { low: 2, med: 3, high: 6 },
+    seedTreatment: { low: 4, med: 6, high: 10 },
+    biologicalsPGR: { low: 2, med: 3, high: 6 },
+  },
+  durum: {
+    preSeedHerb: { low: 14, med: 20, high: 28 },
+    inCropHerb: { low: 12, med: 18, high: 26 },
+    fungicide: { low: 8, med: 14, high: 22 },
+    insecticide: { low: 2, med: 4, high: 8 },
+    seedTreatment: { low: 4, med: 7, high: 12 },
+    biologicalsPGR: { low: 2, med: 4, high: 8 },
+  },
+  peas: {
+    preSeedHerb: { low: 14, med: 20, high: 28 },
+    inCropHerb: { low: 14, med: 20, high: 30 },
+    fungicide: { low: 8, med: 12, high: 18 },
+    insecticide: { low: 4, med: 7, high: 12 },
+    seedTreatment: { low: 4, med: 7, high: 12 },
+    biologicalsPGR: { low: 2, med: 4, high: 8 },
+  },
+  lentils: {
+    preSeedHerb: { low: 14, med: 20, high: 28 },
+    inCropHerb: { low: 14, med: 20, high: 30 },
+    fungicide: { low: 8, med: 12, high: 18 },
+    insecticide: { low: 4, med: 7, high: 12 },
+    seedTreatment: { low: 4, med: 7, high: 12 },
+    biologicalsPGR: { low: 2, med: 4, high: 8 },
+  },
+  soybeans: {
+    preSeedHerb: { low: 14, med: 20, high: 28 },
+    inCropHerb: { low: 14, med: 20, high: 30 },
+    fungicide: { low: 8, med: 12, high: 20 },
+    insecticide: { low: 4, med: 7, high: 12 },
+    seedTreatment: { low: 6, med: 10, high: 16 },
+    biologicalsPGR: { low: 2, med: 4, high: 8 },
+    seedTrait: { low: 0, med: 0, high: 0 },
+  },
+  corn: {
+    preSeedHerb: { low: 18, med: 26, high: 36 },
+    inCropHerb: { low: 18, med: 26, high: 40 },
+    fungicide: { low: 8, med: 14, high: 22 },
+    insecticide: { low: 6, med: 10, high: 18 },
+    seedTreatment: { low: 10, med: 14, high: 22 },
+    biologicalsPGR: { low: 2, med: 4, high: 8 },
+    seedTrait: { low: 0, med: 0, high: 0 },
+  },
+  sunflowers: {
+    preSeedHerb: { low: 14, med: 20, high: 30 },
+    inCropHerb: { low: 14, med: 20, high: 30 },
+    fungicide: { low: 8, med: 12, high: 20 },
+    insecticide: { low: 6, med: 10, high: 16 },
+    seedTreatment: { low: 6, med: 10, high: 16 },
+    biologicalsPGR: { low: 2, med: 4, high: 8 },
+  },
+  other: {
+    preSeedHerb: { low: 12, med: 18, high: 26 },
+    inCropHerb: { low: 12, med: 18, high: 26 },
+    fungicide: { low: 6, med: 10, high: 18 },
+    insecticide: { low: 3, med: 6, high: 10 },
+    seedTreatment: { low: 4, med: 7, high: 12 },
+    biologicalsPGR: { low: 2, med: 4, high: 8 },
+    seedTrait: { low: 0, med: 0, high: 0 },
+  },
+};

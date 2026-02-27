@@ -1,0 +1,79 @@
+import type { ModeledSpend, ProgramResult } from "@/lib/types";
+import { round2 } from "@/lib/engine/utils";
+
+/**
+ * BASF Ag Rewards (simplified from the uploaded Western Canada program):
+ * - Loyalty Reward requires: spend >= $20,000 AND 2+ segments with >=300 acres each.
+ * - 2 segments: Segment 1 pays 2%, Segments 2-4 pay 5%
+ * - 3+ segments: Segment 1 pays 4%, Segments 2-4 pay 9%
+ * - Elite Reward: +1% on all segments if spend >= $250,000 AND Loyalty qualified
+ *
+ * We map user intents -> segments as proxies:
+ * Segment 1 (Crop Establishment) => seedTreatment OR biologicalsPGR
+ * Segment 2 (Herbicide) => preSeedHerb OR inCropHerb
+ * Segment 3 (Broadleaf fungicide) => fungicide (if pulses present, still modeled as fungicide)
+ * Segment 4 (Cereal fungicide) => fungicide (we treat as same bucket in MVP)
+ *
+ * NOTE: In reality BASF separates specific product lists; MVP uses intent-based proxies.
+ */
+export function evalBASF(modeled: ModeledSpend): ProgramResult {
+  const notes: string[] = [];
+
+  const seg1Ac = Math.max(modeled.acresByCategory.seedTreatment, modeled.acresByCategory.biologicalsPGR);
+  const seg2Ac = Math.max(modeled.acresByCategory.preSeedHerb, modeled.acresByCategory.inCropHerb);
+  const seg3Ac = modeled.acresByCategory.fungicide;
+  const seg4Ac = modeled.acresByCategory.fungicide;
+
+  const seg1Qual = seg1Ac >= 300;
+  const seg2Qual = seg2Ac >= 300;
+  const seg3Qual = seg3Ac >= 300;
+  const seg4Qual = seg4Ac >= 300;
+
+  const segCount = [seg1Qual, seg2Qual, seg3Qual, seg4Qual].filter(Boolean).length;
+
+  const spend = modeled.total;
+  const spend20k = spend >= 20000;
+  const spend250k = spend >= 250000;
+
+  const loyalty = spend20k && segCount >= 2;
+  if (!spend20k) notes.push("Modeled spend below $20,000: Loyalty Reward not reached.");
+  if (segCount < 2) notes.push("Fewer than 2 qualifying segments at 300 acres: Loyalty Reward not reached.");
+  if (loyalty) notes.push(`Loyalty Reward qualified with ${segCount} segments.`);
+
+  const rate1 = loyalty ? (segCount >= 3 ? 0.04 : 0.02) : 0;
+  const rate234 = loyalty ? (segCount >= 3 ? 0.09 : 0.05) : 0;
+
+  const elite = loyalty && spend250k;
+  const eliteRate = elite ? 0.01 : 0;
+  if (elite) notes.push("Elite Reward qualified (+1%).");
+
+  const seg1Spend = seg1Qual ? (modeled.byCategory.seedTreatment + modeled.byCategory.biologicalsPGR) : 0;
+  const seg2Spend = seg2Qual ? (modeled.byCategory.preSeedHerb + modeled.byCategory.inCropHerb) : 0;
+  const seg3Spend = seg3Qual ? modeled.byCategory.fungicide : 0;
+  const seg4Spend = 0; // MVP: avoid double counting fungicide spend in both Seg 3 and 4
+
+  const seg1Pay = seg1Spend * (rate1 + eliteRate);
+  const seg2Pay = seg2Spend * (rate234 + eliteRate);
+  const seg3Pay = seg3Spend * (rate234 + eliteRate);
+  const seg4Pay = seg4Spend * (rate234 + eliteRate);
+
+  const estimatedCashback = seg1Pay + seg2Pay + seg3Pay + seg4Pay;
+
+  const totalAcres = Math.max(seg1Ac, seg2Ac, seg3Ac);
+
+  return {
+    company: "BASF Ag Rewards (modeled)",
+    estimatedCashback: round2(estimatedCashback),
+    estimatedPerAcre: round2(totalAcres ? estimatedCashback / totalAcres : 0),
+    notes: [
+      ...notes,
+      "MVP simplification: fungicide spend is not split across broadleaf vs cereal fungicide segments.",
+    ],
+    breakdown: [
+      { label: "Segment 1 payout", value: seg1Pay },
+      { label: "Segment 2 payout", value: seg2Pay },
+      { label: "Segment 3 payout", value: seg3Pay },
+      { label: "Elite add-on (included above if qualified)", value: elite ? eliteRate : 0 },
+    ],
+  };
+}
